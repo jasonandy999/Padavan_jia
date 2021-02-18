@@ -113,14 +113,14 @@ jobs:
         cp -f adg/Advanced_adguardhome.asp $WORK_PATH/trunk/user/www/n56u_ribbon_fixed
         #cd $WORK_PATH/trunk/user/adguardhome
         #sed -i "s#https://cdn.jsdelivr.net/gh/chongshengB/rt-n56u/trunk/user/adguardhome/AdGuardHome#https://cdn.jsdelivr.net/gh/${{ github.repository_owner }}/Padavan_jia/adg/AdGuardHome#g" ./adguardhome.sh
-    - name: Update latest v2ray
-      run: |
-        #cp -f v2ray/v2ray-core-4.34.0.tar.gz $WORK_PATH/trunk/user/v2ray
-        #cd $WORK_PATH/trunk/user/v2ray
-        #sed -i "s#V2ray_VERSION := 4.31.2#V2ray_VERSION := 4.34.0#g" ./Makefile
-        cp -f bashScripts/v2.sh $(pwd)
-        sudo chmod 777 ./v2.sh
-        bash ./v2.sh $WORK_PATH/trunk/user/v2ray
+#    - name: Update latest v2ray
+#      run: |
+#        #cp -f v2ray/v2ray-core-4.34.0.tar.gz $WORK_PATH/trunk/user/v2ray
+#        #cd $WORK_PATH/trunk/user/v2ray
+#        #sed -i "s#V2ray_VERSION := 4.31.2#V2ray_VERSION := 4.34.0#g" ./Makefile
+#        cp -f bashScripts/v2.sh $(pwd)
+#        sudo chmod 777 ./v2.sh
+#        bash ./v2.sh $WORK_PATH/trunk/user/v2ray
     - name: Custom config
       run: |
         cd $WORK_PATH/trunk
