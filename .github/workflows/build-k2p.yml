@@ -212,27 +212,27 @@ jobs:
         sed -i "s/FIRMWARE_BUILDS_REV=.*/FIRMWARE_BUILDS_REV=${{ github.event.inputs.firmwarever }}/g" ./versions.inc
         echo '更新版本号时间'
         #########################################################################################
-    - name: Start build firmware
-      run: |                         # 执行构建固件
-        cd $work_dir
-        for m in $targets; do fakeroot ./build_firmware_ci $m; \
-        if [ $? = 0 ]; then mv -f images/*.trx $images_dir/padavan_${m}_$(date +%Y%m%d).trx; else exit 1; fi; \
-        ./clear_tree_simple >/dev/null 2>&1; done
-    - name: Upload images to Artifact
-      if: ${{ success() }}
-      uses: actions/upload-artifact@main
-      with:
-      name: padavan_${{ env.build_variant }}
-      path: ${{ env.images_dir }}
-    - name: Upload images to CowTransfer
-      if: env.upload_cowtransfer == 'true' && success()
-      run: |                         # 上传到奶牛快传
-        curl -fsSL git.io/file-transfer | sh
-        ./transfer cow --block 2621440 -s -p 64 --no-progress ${images_dir} 2>&1 | tee cowtransfer.log
-        echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
-    - name: Upload images to WeTransfer
-      if: env.upload_wetransfer == 'true' && success()
-      run: |                         # 上传到 WeTransfer
-        curl -fsSL git.io/file-transfer | sh
-        ./transfer wet -s -p 16 --no-progress ${images_dir} 2>&1 | tee wetransfer.log
-        echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
+      - name: Start build firmware
+        run: |                         # 执行构建固件
+          cd $work_dir
+          for m in $targets; do fakeroot ./build_firmware_ci $m; \
+          if [ $? = 0 ]; then mv -f images/*.trx $images_dir/padavan_${m}_$(date +%Y%m%d).trx; else exit 1; fi; \
+          ./clear_tree_simple >/dev/null 2>&1; done
+      - name: Upload images to Artifact
+        if: ${{ success() }}
+        uses: actions/upload-artifact@main
+        with:
+          name: padavan_${{ env.build_variant }}
+          path: ${{ env.images_dir }}
+      - name: Upload images to CowTransfer
+        if: env.upload_cowtransfer == 'true' && success()
+        run: |                         # 上传到奶牛快传
+          curl -fsSL git.io/file-transfer | sh
+          ./transfer cow --block 2621440 -s -p 64 --no-progress ${images_dir} 2>&1 | tee cowtransfer.log
+          echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
+      - name: Upload images to WeTransfer
+        if: env.upload_wetransfer == 'true' && success()
+        run: |                         # 上传到 WeTransfer
+          curl -fsSL git.io/file-transfer | sh
+          ./transfer wet -s -p 16 --no-progress ${images_dir} 2>&1 | tee wetransfer.log
+          echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
