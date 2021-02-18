@@ -1,28 +1,16 @@
 name: Build K2P
 
 on:
-  release:
-    types: [published]
-  push:
-    tags:
-    - 'v*'
-  #  branches: 
-  #    - master
-#  schedule:
-#    - cron: 0 8 * * 5
-  watch:
-    types: [started]
-    
   workflow_dispatch:
     inputs:
       name:
-        description: 'Build_Padavan'
+        description: 'Build_ChongshengB_Padavan'
         required: true
         default: 'build'
       firmwarever:
         description: 'firmware''s version'
         required: true
-        default: '20201124'
+        default: '20201015'
       rainbowui:
         description: 'whether to apply rainbow ui'
         required: true
@@ -30,7 +18,7 @@ on:
       mobileui:
         description: 'whether to apply mobile ui patch for original ui'
         required: true
-        default: 'true'
+        default: 'false'
       ssp:
         description: 'whether to apply the patch for download ssp bin from local or remote url'
         required: true
@@ -103,8 +91,8 @@ jobs:
         cp -f ssp/variables.c $WORK_PATH//trunk/user/httpd
         cp -f ssp/Shadowsocks.asp $WORK_PATH/trunk/user/www/n56u_ribbon_fixed
         cd $WORK_PATH/trunk/user/shared
-        #sed -i "s#https://cdn.jsdelivr.net/gh/jasonandy999/Padavan_jia/ssp/trojan#https://cdn.jsdelivr.net/gh/${{ github.repository_owner }}/Padavan_jia/ssp/trojan#g" ./defaults.c
-        #sed -i "s#https://cdn.jsdelivr.net/gh/jasonandy999/Padavan_jia/ssp/v2ray#https://cdn.jsdelivr.net/gh/${{ github.repository_owner }}/Padavan_jia/ssp/v2ray#g" ./defaults.c
+        #sed -i "s#https://cdn.jsdelivr.net/gh/Padavan_CI/ssp/trojan#https://cdn.jsdelivr.net/gh/${{ github.repository_owner }}/Padavan_CI/ssp/trojan#g" ./defaults.c
+        #sed -i "s#https://cdn.jsdelivr.net/gh/Padavan_CI/ssp/v2ray#https://cdn.jsdelivr.net/gh/${{ github.repository_owner }}/Padavan_CI/ssp/v2ray#g" ./defaults.c
     - name: Update latest adg
       run: |
         cp -f adg/adguardhome.sh $WORK_PATH/trunk/user/adguardhome
@@ -112,15 +100,15 @@ jobs:
         cp -f adg/variables.c $WORK_PATH//trunk/user/httpd
         cp -f adg/Advanced_adguardhome.asp $WORK_PATH/trunk/user/www/n56u_ribbon_fixed
         #cd $WORK_PATH/trunk/user/adguardhome
-        #sed -i "s#https://cdn.jsdelivr.net/gh/chongshengB/rt-n56u/trunk/user/adguardhome/AdGuardHome#https://cdn.jsdelivr.net/gh/${{ github.repository_owner }}/Padavan_jia/adg/AdGuardHome#g" ./adguardhome.sh
-#    - name: Update latest v2ray
-#      run: |
-#        #cp -f v2ray/v2ray-core-4.34.0.tar.gz $WORK_PATH/trunk/user/v2ray
-#        #cd $WORK_PATH/trunk/user/v2ray
-#        #sed -i "s#V2ray_VERSION := 4.31.2#V2ray_VERSION := 4.34.0#g" ./Makefile
-#        cp -f bashScripts/v2.sh $(pwd)
-#        sudo chmod 777 ./v2.sh
-#        bash ./v2.sh $WORK_PATH/trunk/user/v2ray
+        #sed -i "s#https://cdn.jsdelivr.net/gh/chongshengB/rt-n56u/trunk/user/adguardhome/AdGuardHome#https://cdn.jsdelivr.net/gh/${{ github.repository_owner }}/Padavan_CI/adg/AdGuardHome#g" ./adguardhome.sh
+    - name: Update latest v2ray
+      run: |
+        #cp -f v2ray/v2ray-core-4.34.0.tar.gz $WORK_PATH/trunk/user/v2ray
+        #cd $WORK_PATH/trunk/user/v2ray
+        #sed -i "s#V2ray_VERSION := 4.31.2#V2ray_VERSION := 4.34.0#g" ./Makefile
+        cp -f bashScripts/v2.sh $(pwd)
+        sudo chmod 777 ./v2.sh
+        bash ./v2.sh $WORK_PATH/trunk/user/v2ray
     - name: Custom config
       run: |
         cd $WORK_PATH/trunk
@@ -213,43 +201,26 @@ jobs:
         echo '更新版本号时间'
         #########################################################################################
     - name: Build Firmware
-      env:
-        TNAME: K2P
       run: |
         cd /opt/rt-n56u/trunk
-        if [ ! -f configs/templates/$TNAME.config ] ; then
-        echo "configs/templates/$TNAME.config not found "
-        exit 1
-        fi
-        cp -f configs/templates/$TNAME.config .config
-        sudo ./clear_tree
-        sudo ./build_firmware_modify $TNAME 0
-        sudo mv -f images/*.trx /opt/images/${TNAME}_Hanwckf_$(date +"%Y%m%d").trx
-    - name: Organize files
-      id: organize
-      run: |
-        echo "::set-output name=status::success"
-    - name: Upload packages - push to artifact file
-      uses: actions/upload-artifact@main
-      if: steps.organize.outputs.status == 'success'
+        sudo ./clear_tree.sh
+        sudo ./build_firmware.sh
+        sudo mv -f images/*.trx /opt/images/
+    - name : Upload packages
+      uses: actions/upload-artifact@master
+      if: always()
       with:
-        name: Padavan-packages
+        name: Padavan-packages-K1
         path: /opt/images
-      #上传到WeTransfer
-    - name: Upload firmware to WeTransfer
-      id: wetransfer
-      if: steps.organize.outputs.status == 'success'
+    - name: Upload firmware to cowtransfer
+      if: always()
       run: |
         curl -fsSL git.io/file-transfer | sh
-        ./transfer wet  -s -p 16 --no-progress /opt/images/*.trx 2>&1 | tee wetransfer.log
-        echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
-        echo "::set-output name=status::success"
-      #上传到奶牛快传
-    - name: Upload firmware to cowtransfer
-      id: cowtransfer
-      if: steps.organize.outputs.status == 'success'
-      run: |
-        curl -sL https://git.io/cowtransfer | sh
-        ./cowtransfer-uploader -s -p 16 --hash /opt/images/*.trx 2>&1 | tee cowtransfer.log
+        ./transfer cow --block 2621440 -s -p 64 --no-progress /opt/images 2>&1 | tee cowtransfer.log
         echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
-        echo "::set-output name=status::success"
+    - name: Upload firmware to WeTransfer
+      if: always()
+      run: |
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer wet -s -p 16 --no-progress /opt/images 2>&1 | tee wetransfer.log
+        echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
