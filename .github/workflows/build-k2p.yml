@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       name:
-        description: 'Build_ChongshengB_Padavan'
+        description: 'Build_Padavan'
         required: true
         default: 'build'
       firmwarever:
         description: 'firmware''s version'
         required: true
-        default: '20201015'
+        default: '20201124'
       rainbowui:
         description: 'whether to apply rainbow ui'
         required: true
@@ -18,7 +18,7 @@ on:
       mobileui:
         description: 'whether to apply mobile ui patch for original ui'
         required: true
-        default: 'false'
+        default: 'true'
       ssp:
         description: 'whether to apply the patch for download ssp bin from local or remote url'
         required: true
